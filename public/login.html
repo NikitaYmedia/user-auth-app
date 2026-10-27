@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MyAccount</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h2>Login to Your Account</h2>
+            <form id="loginForm">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="submit">Login</button>
+                <p id="message" role="status" aria-live="polite"></p>
+                <p class="register-link">
+                    Don't have an account?
+                    <a href="/register.html">Register here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    <script src="/js/login.js"></script>
+</body>
+
+</html>
