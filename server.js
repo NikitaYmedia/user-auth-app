@@ -25,7 +25,7 @@ app.use(session({
 
 app.use(express.static("public"));
 app.get("/", (req, res) => {
-    res.send("Server is work!");
+    res.redirect("/login.html");
 });
 
 app.post("/register", async (req, res) => {
