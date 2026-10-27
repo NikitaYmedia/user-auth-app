@@ -5,7 +5,12 @@ const session = require("express-session");
 require("dotenv").config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
 app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -13,7 +18,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 60
     }
 }));
