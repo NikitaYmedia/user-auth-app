@@ -1,5 +1,8 @@
 require("dotenv").config();
 const express = require("express");
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const session = require("express-session");
@@ -251,6 +254,32 @@ app.post("/api/forgot-password", async (req, res) => {
              VALUES ($1, $2, $3)`,
             [userId, tokenHash, expiresAt]
         );
+
+        const baseUrl = process.env.APP_URL;
+
+        if (!baseUrl) {
+            throw new Error("APP_URL environment variable is missing.");
+        }
+
+        const resetUrl =
+            `${baseUrl}/reset-password.html?token=${token}`;
+
+        const { error: emailError } = await resend.emails.send({
+            from: "Your App <onboarding@resend.dev>",
+            to: [normalizedEmail],
+            subject: "Reset your password",
+            html: `
+                <h2>Reset your password</h2>
+                <p>We received a request to reset your password.</p>
+                <p><a href="${resetUrl}">Reset password</a></p>
+                <p>This link expires in 15 minutes.</p>
+                <p>If you did not request this, you can ignore this email.</p>
+            `
+        });
+
+        if (emailError) {
+            throw new Error("Email delivery failed.");
+        }
 
         return res.status(200).json({
             message: responseMessage
