@@ -10,13 +10,8 @@ const pool = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-
-if (!ADMIN_EMAIL || ADMIN_PASSWORD) {
-    throw new Error("Admin credentials are missing from environment variables.")
-}
 
 if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
