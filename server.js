@@ -11,6 +11,13 @@ const pool = require("./db");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_EMAIL || ADMIN_PASSWORD) {
+    throw new Error("Admin credentials are missing from environment variables.")
+}
+
 if (process.env.NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
@@ -36,6 +43,60 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
     res.redirect("/login.html");
 });
+
+
+app.post("/admin-login", async (req, res) => {
+    const { email, password } = req.body || {};
+
+    if (
+        typeof email !== "string" ||
+        typeof password !== "string"
+    ) {
+        return res.status(400).json({
+            message: "Email and password are required."
+        });
+    }
+
+    const emailMatches =
+        email.trim().toLowerCase() === ADMIN_EMAIL;
+
+    const passwordMatches =
+        password === ADMIN_PASSWORD;
+
+    if (!emailMatches || !passwordMatches) {
+        return res.status(401).json({
+            message: "Invalid administrator credentials."
+        });
+    }
+
+    req.session.regenerate((error) => {
+        if (error) {
+            console.error("Admin session error:", error.message);
+
+            return res.status(500).json({
+                message: "Login failed. Please try again."
+            });
+        }
+
+        req.session.isAdmin = true;
+        req.session.adminEmail = ADMIN_EMAIL;
+
+        req.session.save((saveError) => {
+            if (saveError) {
+                console.error("Admin session save error:", saveError.message);
+
+                return res.status(500).json({
+                    message: "Login failed. Please try again."
+                });
+            }
+
+            return res.status(200).json({
+                message: "Administrator login successful!"
+            });
+        });
+    });
+});
+
 
 app.post("/register", async (req, res) => {
     let { email, password } = req.body || {};
@@ -295,7 +356,7 @@ app.post("/api/forgot-password", async (req, res) => {
         });
     }
 });
-    
+
 app.post("/api/reset-password", async (req, res) => {
     const { token, password } = req.body || {};
 
@@ -369,6 +430,34 @@ app.post("/api/reset-password", async (req, res) => {
         });
     }
 });
+
+app.get("/api/admin/users", async (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).json({
+            message: "Access denied."
+        });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT id, email
+             FROM users
+             ORDER BY id DESC`
+        );
+
+        return res.status(200).json({
+            total: result.rows.length,
+            users: result.rows
+        });
+    } catch (error) {
+        console.error("Admin users error:", error.message);
+
+        return res.status(500).json({
+            message: "Unable to load users."
+        });
+    }
+});
+
 
 app.get("/account", (req, res) => {
     if (!req.session.userId) {
