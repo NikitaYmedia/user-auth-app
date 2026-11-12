@@ -1,4 +1,3 @@
-
 # User Authentication App
 
 A full-stack web application with user registration and login.
