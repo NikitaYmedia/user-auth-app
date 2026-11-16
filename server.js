@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const session = require("express-session");
 const pool = require("./db");
+const { number } = require("framer-motion");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -452,6 +453,84 @@ app.get("/api/admin/users", async (req, res) => {
         });
     }
 });
+
+app.get("/api/admin/users/:id", async (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).json({ message: "Access denied." });
+    }
+
+    const userId = Number(req.params.id);
+
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+        return res.status(400).json({ message: "Invalid user ID." });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT
+                id,
+                email,
+                created_at,
+                password_hash IS NOT NULL AS password_set
+             FROM users
+             WHERE id = $1`,
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        return res.status(200).json({
+            user: result.rows[0]
+        });
+    } catch (error) {
+        console.error("Admin user profile error:", error.message);
+        return res.status(500).json({
+            message: "Unable to load user profile."
+        });
+    }
+});
+
+app.delete("/api/admin/users/:id", async (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).json({ message: "Access denied." });
+    }
+
+    const userId = Number(req.params.id);
+
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+        return res.status(400).json({ message: "Invalid user ID." });
+    }
+
+    try {
+        const result = await pool.query(
+            "DELETE FROM users WHERE id = $1 RETURNING id",
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        return res.status(200).json({
+            message: "User deleted successfully."
+        });
+    } catch (error) {
+        console.error("Admin user deletion error:", error.message);
+
+        if (error.code === "23503") {
+            return res.status(409).json({
+                message: "This user has related records and cannot be deleted yet."
+            });
+        }
+
+        return res.status(500).json({
+            message: "Unable to delete user."
+        });
+    }
+});
+
 
 
 app.get("/account", (req, res) => {
