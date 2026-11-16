@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const session = require("express-session");
 const pool = require("./db");
-const { number } = require("framer-motion");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
