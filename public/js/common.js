@@ -1,4 +1,3 @@
-// Общие помощники для всех страниц. Здесь нет стилей: только классы и атрибуты.
 (function () {
     async function request(method, url, body) {
         let response;
@@ -24,7 +23,6 @@
         return { ok: response.ok, status: response.status, data };
     }
 
-    // kind: "error" | "success" | "" (нейтральное сообщение). Пустой текст прячет блок.
     function showMessage(element, text, kind) {
         if (!element) {
             return;

@@ -1,7 +1,3 @@
--- Идемпотентная миграция: безопасно запускать сколько угодно раз.
--- Выполняется автоматически при старте сервера (см. ensureSchema в server.js).
--- Существующие таблицы users и password_reset_tokens не пересоздаются.
-
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMPTZ;
 
@@ -16,7 +12,6 @@ CREATE TABLE IF NOT EXISTS admin_requests (
     reviewed_by VARCHAR(255)
 );
 
--- У одного пользователя может быть только один запрос в ожидании
 CREATE UNIQUE INDEX IF NOT EXISTS admin_requests_one_pending_per_user
     ON admin_requests (user_id) WHERE status = 'pending';
 

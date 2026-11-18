@@ -35,9 +35,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Сессии хранятся в Postgres (таблица "session" создаётся сама), поэтому
-// они переживают перезапуск сервера и работают на serverless-хостинге.
-// Своё имя cookie, чтобы не конфликтовать с другими проектами на localhost.
 const SESSION_COOKIE = "auto.sid";
 
 app.use(
@@ -57,19 +54,10 @@ app.use(
 );
 
 app.use(express.static(path.join(__dirname, "public")));
-
-// schemaReady объявляется ниже (function-hoisting для ensureSchema не нужен: промис создаётся при загрузке модуля)
 app.use((req, res, next) => {
     schemaReady.then(() => next());
 });
 
-/* ------------------------------------------------------------------ */
-/* Helpers                                                             */
-/* ------------------------------------------------------------------ */
-
-// Журнал событий в памяти (для вкладок Infrastructure и Security Logs).
-// На serverless-хостинге очищается при перезапуске — для постоянного
-// журнала нужна отдельная таблица.
 const events = [];
 
 function logEvent(type, title, detail = "", source = "App") {
@@ -218,7 +206,6 @@ async function sendPasswordResetEmail(userId, email) {
         [userId, tokenHash, expiresAt]
     );
 
-    // В продакшене адрес берём только из окружения (защита от подмены Host).
     const baseUrl =
         process.env.APP_URL ||
         (IS_PRODUCTION ? null : `http://localhost:${PORT}`);
@@ -260,17 +247,9 @@ async function ensureSchema() {
     }
 }
 
-/* ------------------------------------------------------------------ */
-/* Pages                                                               */
-/* ------------------------------------------------------------------ */
-
 app.get("/", (req, res) => {
     res.redirect("/login.html");
 });
-
-/* ------------------------------------------------------------------ */
-/* Auth: users                                                         */
-/* ------------------------------------------------------------------ */
 
 app.post("/register", async (req, res) => {
     let { email, password } = req.body || {};
@@ -429,10 +408,6 @@ app.post("/logout", (req, res) => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/* Password reset                                                      */
-/* ------------------------------------------------------------------ */
-
 app.post("/api/forgot-password", async (req, res) => {
     const { email } = req.body || {};
 
@@ -542,10 +517,6 @@ app.post("/api/reset-password", async (req, res) => {
         });
     }
 });
-
-/* ------------------------------------------------------------------ */
-/* Account (current user)                                              */
-/* ------------------------------------------------------------------ */
 
 app.get("/account", requireUser, async (req, res) => {
     try {
@@ -784,12 +755,7 @@ app.delete("/api/account", requireUser, async (req, res) => {
     }
 });
 
-/* ------------------------------------------------------------------ */
-/* Auth: administrators                                                */
-/* ------------------------------------------------------------------ */
-
 async function verifyAdminCredentials(email, password) {
-    // 1. Главный администратор из .env
     if (
         ADMIN_EMAIL &&
         ADMIN_PASSWORD &&
@@ -799,7 +765,6 @@ async function verifyAdminCredentials(email, password) {
         return { email: ADMIN_EMAIL, userId: null, root: true };
     }
 
-    // 2. Пользователи, которым выдали права через Admin Requests
     const result = await pool.query(
         `SELECT id, email, password_hash
          FROM users
@@ -888,10 +853,6 @@ app.post("/admin-logout", (req, res) => {
         });
     });
 });
-
-/* ------------------------------------------------------------------ */
-/* Admin API                                                           */
-/* ------------------------------------------------------------------ */
 
 app.get("/api/admin/me", requireAdmin, async (req, res) => {
     try {
@@ -1234,14 +1195,7 @@ app.get("/api/admin/events", requireAdmin, (req, res) => {
     return res.status(200).json({ events });
 });
 
-/* ------------------------------------------------------------------ */
-/* Start                                                               */
-/* ------------------------------------------------------------------ */
-
 logEvent("success", "Server started", `Node ${process.version}`, "Runtime");
-
-// Миграция выполняется один раз; запросы ждут её завершения (важно для
-// холодного старта на Vercel, где сервер запускается прямо на первом запросе).
 const schemaReady = ensureSchema();
 
 if (require.main === module) {

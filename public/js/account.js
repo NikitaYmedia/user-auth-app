@@ -9,8 +9,6 @@ const passwordUpdated = document.getElementById("passwordUpdated");
 
 let account = null;
 
-/* ---------- Render ---------- */
-
 function setBadge(text, kind) {
     tierBadge.textContent = text;
     tierBadge.className = "badge badge--dot" + (kind ? ` badge--${kind}` : "");
@@ -70,8 +68,6 @@ async function loadAccount() {
     }
 }
 
-/* ---------- Dialog helper ---------- */
-
 function setupDialog({ dialogId, formId, messageId, onSubmit, onOpen }) {
     const dialog = document.getElementById(dialogId);
     const form = document.getElementById(formId);
@@ -115,8 +111,6 @@ function setupDialog({ dialogId, formId, messageId, onSubmit, onOpen }) {
     };
 }
 
-/* ---------- Admin request ---------- */
-
 const adminRequestDialog = setupDialog({
     dialogId: "adminRequestDialog",
     formId: "adminRequestForm",
@@ -141,8 +135,6 @@ const adminRequestDialog = setupDialog({
 });
 
 requestAdminButton.addEventListener("click", () => adminRequestDialog.open());
-
-/* ---------- Email ---------- */
 
 const emailDialog = setupDialog({
     dialogId: "emailDialog",
@@ -181,8 +173,6 @@ document.getElementById("copyEmailButton").addEventListener("click", async () =>
     }
 });
 
-/* ---------- Password ---------- */
-
 const passwordDialog = setupDialog({
     dialogId: "passwordDialog",
     formId: "passwordForm",
@@ -208,8 +198,6 @@ document
     .getElementById("changePasswordButton")
     .addEventListener("click", () => passwordDialog.open());
 
-/* ---------- Delete account ---------- */
-
 const deleteDialog = setupDialog({
     dialogId: "deleteDialog",
     formId: "deleteForm",
@@ -231,8 +219,6 @@ const deleteDialog = setupDialog({
 document
     .getElementById("deleteAccountButton")
     .addEventListener("click", () => deleteDialog.open());
-
-/* ---------- Logout ---------- */
 
 document.getElementById("logoutButton").addEventListener("click", async () => {
     try {
