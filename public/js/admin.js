@@ -1,143 +1,304 @@
+const $ = (id) => document.getElementById(id);
 
-const totalUsers = document.getElementById("totalUsers");
-const usersTable = document.getElementById("usersTable");
-const message = document.getElementById("message");
-const search = document.getElementById("search");
-const logoutButton = document.getElementById("logoutButton");
+const message = $("message");
+const usersTable = $("usersTable");
+const search = $("search");
 
-const profilePanel = document.getElementById("profilePanel");
-const profileId = document.getElementById("profileId");
-const profileEmail = document.getElementById("profileEmail");
-const profileDate = document.getElementById("profileDate");
-const profilePassword = document.getElementById("profilePassword");
-const profileMessage = document.getElementById("profileMessage");
-const closeProfile = document.getElementById("closeProfile");
+const views = {
+    users: { title: "Admin Dashboard", crumb: "Dashboard" },
+    requests: { title: "Admin Requests", crumb: "Admin Requests" },
+    infrastructure: { title: "Infrastructure", crumb: "Infrastructure" },
+    logs: { title: "Security Logs", crumb: "Security Logs" }
+};
 
 let users = [];
+let requests = [];
+let selectedUserId = null;
+let currentView = "users";
+
+/* ---------- Helpers ---------- */
+
+function el(tag, className, text) {
+    const node = document.createElement(tag);
+
+    if (className) {
+        node.className = className;
+    }
+
+    if (text !== undefined) {
+        node.textContent = text;
+    }
+
+    return node;
+}
+
+function icon(name) {
+    return el("span", `icon icon-${name}`);
+}
+
+function initial(email) {
+    return String(email || "?").charAt(0).toUpperCase();
+}
+
+// Все запросы к админ-API: при 401/403 уходим на страницу входа.
+async function adminRequest(method, url, body) {
+    const result = await App.request(method, url, body);
+
+    if (result.status === 401 || result.status === 403) {
+        window.location.href = "/admin-login.html";
+        throw new Error("Redirecting to login...");
+    }
+
+    if (!result.ok) {
+        throw new Error(result.data.message || "Request failed.");
+    }
+
+    return result.data;
+}
+
+function formatBytes(bytes) {
+    if (bytes >= 1024 ** 3) {
+        return (bytes / 1024 ** 3).toFixed(2) + " GB";
+    }
+
+    return (bytes / 1024 ** 2).toFixed(1) + " MB";
+}
+
+function formatUptime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    return hours ? `${hours}h ${minutes}m` : `${minutes}m ${seconds % 60}s`;
+}
+
+/* ---------- Views ---------- */
+
+function showView(name) {
+    if (!views[name]) {
+        name = "users";
+    }
+
+    currentView = name;
+
+    Object.keys(views).forEach((key) => {
+        $("view-" + key).hidden = key !== name;
+    });
+
+    document.querySelectorAll(".nav-item[data-view]").forEach((item) => {
+        item.classList.toggle("is-active", item.dataset.view === name);
+    });
+
+    $("topbarTitle").textContent = views[name].title;
+    $("crumbView").textContent = views[name].crumb;
+    App.showMessage(message, "");
+
+    history.replaceState(null, "", "#" + name);
+
+    if (name === "users") {
+        loadUsers();
+        loadRequests();
+    }
+
+    if (name === "requests") {
+        loadRequests();
+    }
+
+    if (name === "infrastructure") {
+        loadInfrastructure();
+    }
+
+    if (name === "logs") {
+        loadLogs();
+    }
+}
+
+document.querySelectorAll("[data-view]").forEach((control) => {
+    control.addEventListener("click", () => showView(control.dataset.view));
+});
+
+/* ---------- Current admin ---------- */
+
+async function loadMe() {
+    try {
+        const me = await adminRequest("GET", "/api/admin/me");
+
+        $("meEmail").textContent = me.email;
+        $("meName").textContent = me.root ? "Root Admin" : "Administrator";
+        $("meAvatar").textContent = initial(me.email) + (me.root ? "D" : "");
+        $("envBadge").textContent =
+            me.environment.charAt(0).toUpperCase() + me.environment.slice(1);
+        $("envRegion").textContent = me.region;
+
+        renderPendingCount(me.pendingRequests);
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+    }
+}
+
+function renderPendingCount(count) {
+    const badge = $("navRequestsBadge");
+
+    badge.hidden = count === 0;
+    badge.textContent = `${count} pending`;
+    $("pendingBadge").textContent = `${count} Pending`;
+}
+
+/* ---------- Users ---------- */
 
 async function loadUsers() {
-    message.textContent = "Loading users...";
+    $("usersSummary").textContent = "Loading users...";
 
     try {
-        const response = await fetch("/api/admin/users");
-
-        if (response.status === 401 || response.status === 403) {
-            window.location.href = "/admin-login.html";
-            return;
-        }
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Unable to load users.");
-        }
+        const data = await adminRequest("GET", "/api/admin/users");
 
         users = data.users || [];
 
-        totalUsers.textContent = data.total ?? users.length;
+        $("totalUsers").textContent = data.total ?? users.length;
+        $("navUsersCount").textContent = data.total ?? users.length;
+        $("verifiedPercent").textContent = `${data.verifiedPercent}%`;
 
         renderUsers();
-
-        message.textContent = users.length
-            ? `Showing ${users.length} registered users.`
-            : "No registered users yet.";
-
     } catch (error) {
-        message.textContent = error.message;
+        $("usersSummary").textContent = "Unable to load users.";
+        App.showMessage(message, error.message, "error");
     }
 }
 
 function renderUsers() {
     const query = search.value.trim().toLowerCase();
 
-    const filteredUsers = users.filter(user =>
+    const filtered = users.filter((user) =>
         String(user.email || "").toLowerCase().includes(query)
     );
 
-    usersTable.innerHTML = "";
+    usersTable.replaceChildren();
 
-    filteredUsers.forEach(user => {
-        const row = document.createElement("tr");
+    if (filtered.length === 0) {
+        const row = el("tr");
+        const cell = el(
+            "td",
+            "table__empty",
+            users.length ? "No users match your search." : "No registered users yet."
+        );
+        cell.colSpan = 4;
+        row.appendChild(cell);
+        usersTable.appendChild(row);
+    }
 
-        const idCell = document.createElement("td");
-        idCell.textContent = user.id;
+    filtered.forEach((user) => {
+        const selected = user.id === selectedUserId;
+        const row = el("tr", "table__row" + (selected ? " is-selected" : ""));
 
-        const emailCell = document.createElement("td");
-        emailCell.textContent = user.email;
+        row.appendChild(el("td", "", user.id));
 
-        const actionsCell = document.createElement("td");
+        const emailCell = el("td");
+        const userCell = el("div", "user-cell");
+        userCell.appendChild(el("span", "avatar", initial(user.email)));
+        userCell.appendChild(el("span", "", user.email));
 
-        // Profile button
-        const profileButton = document.createElement("button");
-        profileButton.textContent = "Profile";
-        profileButton.className = "action-button profile-button";
+        if (selected) {
+            userCell.appendChild(el("span", "badge badge--dark", "Selected"));
+        }
 
-        profileButton.addEventListener("click", () => {
-            openProfile(user.id);
-        });
+        if (user.isAdmin) {
+            userCell.appendChild(el("span", "badge badge--info", "Admin"));
+        }
 
-        // Delete button
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "Delete";
-        deleteButton.className = "action-button delete-button";
-
-        deleteButton.addEventListener("click", () => {
-            deleteUser(user.id, user.email);
-        });
-
-        actionsCell.appendChild(profileButton);
-        actionsCell.appendChild(deleteButton);
-
-        row.appendChild(idCell);
+        emailCell.appendChild(userCell);
         row.appendChild(emailCell);
+
+        const statusCell = el("td");
+        statusCell.appendChild(el("span", "badge badge--success", "Active"));
+        row.appendChild(statusCell);
+
+        const actionsCell = el("td");
+        const actions = el("div", "table__actions");
+
+        const profileButton = el(
+            "button",
+            "btn btn--sm " + (selected ? "btn--dark" : "btn--outline"),
+            "Profile"
+        );
+        profileButton.type = "button";
+        profileButton.addEventListener("click", () => openProfile(user.id));
+
+        const deleteButton = el("button", "btn btn--sm btn--danger-soft", "Delete");
+        deleteButton.type = "button";
+        deleteButton.addEventListener("click", () =>
+            deleteUser(user.id, user.email)
+        );
+
+        actions.append(profileButton, deleteButton);
+        actionsCell.appendChild(actions);
         row.appendChild(actionsCell);
 
         usersTable.appendChild(row);
     });
+
+    $("usersSummary").textContent = `Showing ${users.length} registered user${users.length === 1 ? "" : "s"}.`;
+    $("usersFooter").textContent = filtered.length
+        ? `Displaying ${filtered.length === users.length ? "all " : ""}${filtered.length} recorded entr${filtered.length === 1 ? "y" : "ies"}`
+        : "No entries";
+}
+
+/* ---------- Profile ---------- */
+
+function closeProfilePanel() {
+    selectedUserId = null;
+    $("profileBody").hidden = true;
+    $("profileEmpty").hidden = false;
+    renderUsers();
 }
 
 async function openProfile(userId) {
-    profilePanel.style.display = "block";
-    profileMessage.textContent = "Loading profile...";
+    selectedUserId = userId;
 
-    profileId.textContent = "";
-    profileEmail.textContent = "";
-    profileDate.textContent = "";
-    profilePassword.textContent = "";
+    $("profileEmpty").hidden = true;
+    $("profileBody").hidden = false;
+    App.showMessage($("profileMessage"), "Loading profile...");
+
+    renderUsers();
 
     try {
-        const response = await fetch(`/api/admin/users/${userId}`);
-
-        if (response.status === 401 || response.status === 403) {
-            window.location.href = "/admin-login.html";
-            return;
-        }
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Unable to load profile.");
-        }
-
+        const data = await adminRequest("GET", `/api/admin/users/${userId}`);
         const user = data.user;
 
-        profileId.textContent = user.id;
-        profileEmail.textContent = user.email;
-
-        profileDate.textContent = user.created_at
-            ? new Date(user.created_at).toLocaleString()
-            : "Unknown";
-
-        profilePassword.textContent = user.password_set
+        $("profileId").textContent = `ID: ${user.id}`;
+        $("profileEmail").textContent = user.email;
+        $("profileDate").textContent = App.formatDate(user.created_at);
+        $("profilePassword").textContent = user.password_set
             ? "Password is set"
             : "Password is not set";
 
-        profileMessage.textContent = "";
-
+        App.showMessage($("profileMessage"), "");
     } catch (error) {
-        profileMessage.textContent = error.message;
+        App.showMessage($("profileMessage"), error.message, "error");
     }
 }
+
+$("closeProfile").addEventListener("click", closeProfilePanel);
+
+$("resetPasswordButton").addEventListener("click", async () => {
+    if (!selectedUserId) {
+        return;
+    }
+
+    const button = $("resetPasswordButton");
+    App.setBusy(button, true);
+
+    try {
+        const data = await adminRequest(
+            "POST",
+            `/api/admin/users/${selectedUserId}/reset-password`
+        );
+
+        App.showToast(data.message);
+    } catch (error) {
+        App.showToast(error.message, "error");
+    }
+
+    App.setBusy(button, false);
+});
 
 async function deleteUser(userId, email) {
     const confirmed = confirm(
@@ -149,55 +310,261 @@ async function deleteUser(userId, email) {
     }
 
     try {
-        const response = await fetch(`/api/admin/users/${userId}`, {
-            method: "DELETE"
-        });
+        await adminRequest("DELETE", `/api/admin/users/${userId}`);
 
-        if (response.status === 401 || response.status === 403) {
-            window.location.href = "/admin-login.html";
-            return;
+        if (selectedUserId === userId) {
+            closeProfilePanel();
         }
 
-        const data = await response.json();
+        App.showToast("User deleted successfully.");
 
-        if (!response.ok) {
-            throw new Error(data.message || "Unable to delete user.");
-        }
-
-        if (profileId.textContent === String(userId)) {
-            profilePanel.style.display = "none";
-        }
-
-        message.textContent = "User deleted successfully.";
-
-        await loadUsers();
-
+        await Promise.all([loadUsers(), loadRequests(), loadMe()]);
     } catch (error) {
-        message.textContent = error.message;
+        App.showMessage(message, error.message, "error");
     }
 }
 
 search.addEventListener("input", renderUsers);
 
-closeProfile.addEventListener("click", () => {
-    profilePanel.style.display = "none";
-});
+/* ---------- Admin requests ---------- */
 
-logoutButton.addEventListener("click", async () => {
+function renderRequestItem(request) {
+    const item = el("article", "request");
+
+    item.appendChild(el("span", "avatar avatar--amber", initial(request.email)));
+
+    const body = el("div", "request__body");
+    const who = el("p", "request__who");
+    who.appendChild(el("span", "", request.email));
+    who.appendChild(el("span", "chip", `User ID: ${request.userId}`));
+
+    if (request.status !== "pending") {
+        who.appendChild(
+            el(
+                "span",
+                "badge " +
+                    (request.status === "approved" ? "badge--success" : "badge--danger"),
+                request.status === "approved" ? "Approved" : "Declined"
+            )
+        );
+    }
+
+    body.appendChild(who);
+    body.appendChild(el("p", "request__reason", `“${request.reason}”`));
+
+    const meta = el("p", "request__meta");
+    meta.appendChild(icon("clock"));
+    meta.appendChild(
+        el(
+            "span",
+            "",
+            request.status === "pending"
+                ? `Requested ${App.timeAgo(request.createdAt)}`
+                : `Reviewed ${App.timeAgo(request.reviewedAt)} by ${request.reviewedBy || "admin"}`
+        )
+    );
+    body.appendChild(meta);
+    item.appendChild(body);
+
+    if (request.status === "pending") {
+        const actions = el("div", "request__actions");
+
+        const decline = el("button", "btn btn--outline btn--sm", "Decline");
+        decline.type = "button";
+        decline.addEventListener("click", () => reviewRequest(request.id, "decline"));
+
+        const approve = el("button", "btn btn--dark btn--sm", "Approve Admin");
+        approve.type = "button";
+        approve.addEventListener("click", () => reviewRequest(request.id, "approve"));
+
+        actions.append(decline, approve);
+        item.appendChild(actions);
+    }
+
+    return item;
+}
+
+function renderRequestList(container, list, emptyText) {
+    container.replaceChildren();
+
+    if (list.length === 0) {
+        container.appendChild(el("p", "requests__empty", emptyText));
+        return;
+    }
+
+    list.forEach((request) => container.appendChild(renderRequestItem(request)));
+}
+
+async function loadRequests() {
     try {
-        const response = await fetch("/admin-logout", {
-            method: "POST"
-        });
+        const data = await adminRequest("GET", "/api/admin/requests");
 
-        if (!response.ok) {
+        requests = data.requests || [];
+
+        const pending = requests.filter((request) => request.status === "pending");
+
+        renderPendingCount(pending.length);
+        renderRequestList($("pendingList"), pending, "No pending requests.");
+        renderRequestList($("allRequests"), requests, "No requests yet.");
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+    }
+}
+
+async function reviewRequest(requestId, action) {
+    try {
+        const data = await adminRequest(
+            "POST",
+            `/api/admin/requests/${requestId}/${action}`
+        );
+
+        App.showToast(data.message);
+
+        await Promise.all([loadRequests(), loadUsers()]);
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+    }
+}
+
+/* ---------- Infrastructure ---------- */
+
+function fillKv(container, rows) {
+    container.replaceChildren();
+
+    rows.forEach(([label, value]) => {
+        const row = el("div", "kv__row");
+        row.appendChild(el("dt", "", label));
+        row.appendChild(el("dd", "", value));
+        container.appendChild(row);
+    });
+}
+
+function renderEvents(container, list) {
+    container.replaceChildren();
+
+    if (list.length === 0) {
+        container.appendChild(el("li", "events__empty", "No events recorded yet."));
+        return;
+    }
+
+    const icons = { success: "circle-check", warning: "alert", info: "info" };
+
+    list.forEach((event) => {
+        const item = el("li", "event");
+
+        const badge = el("span", `event__icon event__icon--${event.type}`);
+        badge.appendChild(icon(icons[event.type] || "info"));
+        item.appendChild(badge);
+
+        const body = el("div", "event__body");
+        body.appendChild(el("p", "event__title", event.title));
+
+        if (event.detail) {
+            body.appendChild(el("p", "event__detail", event.detail));
+        }
+
+        item.appendChild(body);
+
+        const side = el("div", "event__side", App.timeAgo(event.time));
+        side.appendChild(el("span", "event__source", event.source));
+        item.appendChild(side);
+
+        container.appendChild(item);
+    });
+}
+
+async function loadInfrastructure() {
+    const button = $("refreshInfra");
+    App.setBusy(button, true);
+
+    try {
+        const data = await adminRequest("GET", "/api/admin/infrastructure");
+        const { database, pool, runtime } = data;
+        const operational = data.status === "operational";
+
+        $("infraStatus").textContent =
+            "System Status: " + (operational ? "100% Operational" : "Degraded");
+        $("infraStatus").className =
+            "badge " + (operational ? "badge--success" : "badge--warning");
+
+        $("mHealth").textContent = operational
+            ? "All Systems Operational"
+            : "Degraded";
+        $("mHealthNote").textContent = `Uptime ${formatUptime(runtime.uptimeSeconds)}`;
+        $("mLatency").textContent = `${database.latencyMs}ms`;
+        $("mTransactions").textContent =
+            database.transactions === null
+                ? "n/a"
+                : database.transactions.toLocaleString("en-US");
+        $("mConnections").textContent =
+            `${database.connections} / ${database.maxConnections}`;
+        $("mConnectionsNote").textContent = `Pool waiting queue: ${pool.waiting}`;
+
+        fillKv($("dbKv"), [
+            ["Database", database.name],
+            ["Version", database.version],
+            ["Storage", formatBytes(database.sizeBytes)],
+            ["Host", database.host],
+            ["Direct latency", `${database.latencyMs}ms`]
+        ]);
+
+        fillKv($("poolKv"), [
+            ["Total clients", pool.total],
+            ["Idle clients", pool.idle],
+            ["Waiting requests", pool.waiting],
+            ["Active connections", `${database.connections} / ${database.maxConnections}`]
+        ]);
+
+        fillKv($("runtimeKv"), [
+            ["Node.js", runtime.node],
+            ["Environment", runtime.environment],
+            ["Platform", runtime.platform],
+            ["Uptime", formatUptime(runtime.uptimeSeconds)],
+            ["Memory (RSS)", `${runtime.memoryMb} MB`],
+            ["Heap used", `${runtime.heapMb} MB`]
+        ]);
+
+        renderEvents($("infraEvents"), data.events);
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+    }
+
+    App.setBusy(button, false);
+}
+
+$("refreshInfra").addEventListener("click", loadInfrastructure);
+
+/* ---------- Logs ---------- */
+
+async function loadLogs() {
+    try {
+        const data = await adminRequest("GET", "/api/admin/events");
+        renderEvents($("logEvents"), data.events);
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+    }
+}
+
+/* ---------- Logout ---------- */
+
+async function logout() {
+    try {
+        const { ok } = await App.request("POST", "/admin-logout");
+
+        if (!ok) {
             throw new Error("Logout failed.");
         }
 
         window.location.href = "/admin-login.html";
-
     } catch (error) {
-        message.textContent = error.message;
+        App.showMessage(message, error.message, "error");
     }
-});
+}
 
-loadUsers();
+$("logoutButton").addEventListener("click", logout);
+$("sidebarLogout").addEventListener("click", logout);
+
+/* ---------- Start ---------- */
+
+loadMe();
+showView(location.hash.slice(1));

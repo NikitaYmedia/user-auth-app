@@ -1,35 +1,33 @@
-
 const form = document.getElementById("adminLoginForm");
 const message = document.getElementById("message");
+const submitButton = form.querySelector("[type='submit']");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+    const remember = document.getElementById("remember").checked;
 
-    message.textContent = "Signing in...";
+    App.setBusy(submitButton, true);
+    App.showMessage(message, "Signing in...");
 
     try {
-        const response = await fetch("/admin-login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ email, password })
+        const { ok, data } = await App.request("POST", "/admin-login", {
+            email,
+            password,
+            remember
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Login failed.");
+        if (!ok) {
+            App.showMessage(message, data.message || "Login failed.", "error");
+            App.setBusy(submitButton, false);
+            return;
         }
 
         window.location.href = "/admin.html";
     } catch (error) {
-        message.textContent =
-            error.message === "Failed to fetch"
-                ? "Unable to connect. Please try again."
-                : error.message;
+        App.showMessage(message, error.message, "error");
+        App.setBusy(submitButton, false);
     }
 });

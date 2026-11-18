@@ -4,27 +4,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Create an Account</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/icons.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
-<body>
+<body class="auth-page auth-page--register">
+    <main class="auth-page__main">
+        <div class="auth">
+            <div class="auth__logo"><span class="icon icon-fingerprint"></span></div>
+            <h1 class="auth__title">Create an Account</h1>
+            <p class="auth__subtitle">Get started with your account in seconds</p>
 
-    <div class="container">
-        <h2>Create an Account</h2>
-        <form id="registerForm">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="Enter your email" required>
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" minlength="8"
-                required>
-            <button type="submit">Register</button>
-            <p>Already have an account? <a href="/login.html">Log in</a></p>
-            <p>You are admin? <a href="/admin-login.html">ADMIN</a></p>
-            <p id="message" role="status" aria-live="polite"></p>
-        </form>
-    </div>
-    <script src="js/register.js"></script>
+            <section class="card card--floating auth__card">
+                <form id="registerForm">
+                    <label class="field">
+                        <span class="field__label">Email Address</span>
+                        <input class="input" type="email" id="email" name="email" placeholder="Enter your email" autocomplete="email" required>
+                    </label>
+                    <label class="field">
+                        <span class="field__label">Password</span>
+                        <span class="field__control">
+                            <input class="input" type="password" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" minlength="8" required>
+                            <button class="field__toggle" type="button" data-toggle-password aria-label="Show password">
+                                <span class="icon"></span>
+                            </button>
+                        </span>
+                    </label>
+
+                    <button class="btn btn--primary btn--block" type="submit">Register</button>
+                    <p class="form-message" id="message" role="status" aria-live="polite" hidden></p>
+                </form>
+
+                <div class="auth__links">
+                    <p>Already have an account? <a href="/login.html">Log in</a></p>
+                    <p class="auth__links--small">You are admin? <a href="/admin-login.html">ADMIN</a></p>
+                </div>
+            </section>
+
+            <p class="auth__footer">&copy; 2026 Obsidian &amp; Pure. All rights reserved.</p>
+        </div>
+    </main>
+
+    <script src="/js/common.js"></script>
+    <script src="/js/register.js"></script>
 </body>
 
 </html>

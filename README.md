@@ -1,47 +1,32 @@
 # User Authentication App
 
-A full-stack web application with user registration and login.
+Full-stack приложение: регистрация, вход, настройки аккаунта и админ-панель.
 
-## Features
+## Возможности
 
-- User registration and login
-- Password hashing with bcrypt
-- Session-based authentication
-- PostgreSQL database integration
-- Logout functionality
-- Input validation
+- Регистрация / вход (bcrypt, сессии express-session)
+- Восстановление пароля по email (Resend)
+- Account Settings: смена email и пароля, удаление аккаунта, запрос прав админа
+- Admin Console: пользователи, запросы на права админа (approve / decline),
+  Infrastructure (реальные метрики БД и Node), Security Logs
+- Вход администратора: главный админ из `.env` + пользователи, одобренные через Admin Requests
 
-## Technologies
+## Структура
 
-- HTML, CSS and JavaScript
-- Node.js
-- Express.js
-- PostgreSQL
-- bcrypt
-- express-session
+- `server.js`, `db.js`, `schema.sql` — бэкенд и миграция (выполняется при старте, идемпотентна)
+- `public/css/` — **все стили**: `base.css`, `icons.css` (иконки как CSS-маски), `auth.css`, `account.css`, `admin.css`
+- `public/js/` — только поведение (`common.js` — общие помощники)
 
-## Getting Started
-
-### 1. Install dependencies
+## Запуск
 
 ```bash
 npm install
+cp .env.example .env   # заполнить значения
+npm start              # http://localhost:3000
 ```
 
-### 2. Configure environment variables
+При старте сервер добавляет в БД колонки `users.is_admin`, `users.password_updated_at`
+и таблицу `admin_requests` (`IF NOT EXISTS`, существующие данные не трогаются).
 
-Create a `.env` file with your PostgreSQL connection settings and a secure session secret.
-
-### 3. Start the server
-
-```bash
-node server.js
-```
-
-### 4. Open the application
-
-Visit http://localhost:3000
-
-## Purpose
-
-This project was created to practise full-stack web development, database integration and authentication.
+В продакшене обязательно задайте `APP_URL`. Адрес отправителя `onboarding@resend.dev`
+работает только для тестов (письма уходят лишь владельцу аккаунта Resend).

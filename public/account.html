@@ -5,18 +5,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account</title>
-    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/icons.css">
+    <link rel="stylesheet" href="/css/account.css">
 </head>
 
-<body>
-    <div class="container">
-        <div class="card">
-            <h2>Welcome to your account!</h2>
-            <p id="email">Loading account...</p>
-            <button id="logoutButton" type="button">Logout</button>
-        </div>
-    </div>
+<body class="account-page">
+    <header class="account-topbar">
+        <span class="icon icon-chevron-right"></span>
+        <span>Account</span>
+    </header>
 
+    <main class="account">
+        <h1 class="account__title">Account Settings</h1>
+        <p class="account__subtitle">Manage your profile credentials, permissions, and security protocols.</p>
+
+        <h2 class="section-title">Authorization scope</h2>
+        <section class="card panel">
+            <div class="row">
+                <span class="row__icon"><span class="icon icon-shield-check"></span></span>
+                <div class="row__body">
+                    <div class="row__heading">
+                        <h3 class="row__title row__title--lg">Privilege Tier</h3>
+                        <span class="badge badge--dot" id="tierBadge">Loading...</span>
+                    </div>
+                    <p class="row__text" id="tierText">Loading your account...</p>
+                </div>
+                <div class="row__actions">
+                    <button class="btn btn--dark" type="button" id="requestAdminButton" hidden>
+                        <span class="icon icon-key"></span>Request Admin Access
+                    </button>
+                    <a class="btn btn--dark" href="/admin-login.html" id="openAdminLink" hidden>
+                        <span class="icon icon-shield-check"></span>Open Admin Console
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <h2 class="section-title">Authentication &amp; access keys</h2>
+        <section class="card panel">
+            <div class="row">
+                <span class="row__icon"><span class="icon icon-at"></span></span>
+                <div class="row__body">
+                    <p class="row__label">Primary Email Address</p>
+                    <p class="row__value" id="emailValue">Loading...</p>
+                </div>
+                <div class="row__actions">
+                    <button class="btn btn--sm" type="button" id="copyEmailButton">
+                        <span class="icon icon-copy"></span>Copy
+                    </button>
+                    <button class="btn btn--sm" type="button" id="editEmailButton">
+                        <span class="icon icon-pencil"></span>Edit
+                    </button>
+                </div>
+            </div>
+
+            <div class="row row--divided">
+                <span class="row__icon"><span class="icon icon-lock"></span></span>
+                <div class="row__body">
+                    <p class="row__label">Password Protection</p>
+                    <p class="row__value row__value--inline">
+                        <span class="dots" aria-hidden="true"></span>
+                        <span class="row__meta" id="passwordUpdated">&nbsp;</span>
+                    </p>
+                </div>
+                <div class="row__actions">
+                    <button class="btn btn--sm" type="button" id="changePasswordButton">
+                        <span class="icon icon-key"></span>Change Password
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <h2 class="section-title section-title--danger">Session &amp; governance boundaries</h2>
+        <section class="card panel panel--danger">
+            <div class="row">
+                <span class="row__icon"><span class="icon icon-log-out"></span></span>
+                <div class="row__body">
+                    <h3 class="row__title">Terminate Session</h3>
+                    <p class="row__text">Revoke current dashboard auth credentials and clear local caching.</p>
+                </div>
+                <div class="row__actions">
+                    <button class="btn btn--sm" type="button" id="logoutButton">Log Out</button>
+                </div>
+            </div>
+
+            <div class="row row--danger">
+                <span class="row__icon row__icon--danger"><span class="icon icon-alert"></span></span>
+                <div class="row__body">
+                    <h3 class="row__title">Delete Account</h3>
+                    <p class="row__text">Permanently remove your workspace member profile and access logs. This action cannot be reversed.</p>
+                </div>
+                <div class="row__actions">
+                    <button class="btn btn--danger" type="button" id="deleteAccountButton">
+                        <span class="icon icon-trash"></span>Delete Account
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <p class="form-message" id="pageMessage" role="status" aria-live="polite" hidden></p>
+    </main>
+
+    <!-- Request admin access -->
+    <dialog class="dialog" id="adminRequestDialog">
+        <form class="dialog__form" id="adminRequestForm" method="dialog">
+            <h2 class="dialog__title">Request admin access</h2>
+            <p class="dialog__text">Tell the administrators why you need elevated access.</p>
+            <label class="field">
+                <span class="field__label">Reason</span>
+                <textarea class="textarea" id="adminReason" maxlength="500" placeholder="e.g. I need access to the database monitors" required></textarea>
+            </label>
+            <p class="form-message" id="adminRequestMessage" role="status" hidden></p>
+            <div class="dialog__actions">
+                <button class="btn btn--outline" type="button" data-close-dialog>Cancel</button>
+                <button class="btn btn--dark" type="submit">Send request</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Edit email -->
+    <dialog class="dialog" id="emailDialog">
+        <form class="dialog__form" id="emailForm" method="dialog">
+            <h2 class="dialog__title">Change email address</h2>
+            <p class="dialog__text">Confirm with your current password to continue.</p>
+            <label class="field">
+                <span class="field__label">New email</span>
+                <input class="input" type="email" id="newEmail" autocomplete="email" required>
+            </label>
+            <label class="field">
+                <span class="field__label">Current password</span>
+                <span class="field__control">
+                    <input class="input" type="password" id="emailPassword" autocomplete="current-password" required>
+                    <button class="field__toggle" type="button" data-toggle-password aria-label="Show password">
+                        <span class="icon"></span>
+                    </button>
+                </span>
+            </label>
+            <p class="form-message" id="emailMessage" role="status" hidden></p>
+            <div class="dialog__actions">
+                <button class="btn btn--outline" type="button" data-close-dialog>Cancel</button>
+                <button class="btn btn--dark" type="submit">Save email</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Change password -->
+    <dialog class="dialog" id="passwordDialog">
+        <form class="dialog__form" id="passwordForm" method="dialog">
+            <h2 class="dialog__title">Change password</h2>
+            <p class="dialog__text">Use at least 8 characters.</p>
+            <label class="field">
+                <span class="field__label">Current password</span>
+                <span class="field__control">
+                    <input class="input" type="password" id="currentPassword" autocomplete="current-password" required>
+                    <button class="field__toggle" type="button" data-toggle-password aria-label="Show password">
+                        <span class="icon"></span>
+                    </button>
+                </span>
+            </label>
+            <label class="field">
+                <span class="field__label">New password</span>
+                <span class="field__control">
+                    <input class="input" type="password" id="newPassword" autocomplete="new-password" minlength="8" required>
+                    <button class="field__toggle" type="button" data-toggle-password aria-label="Show password">
+                        <span class="icon"></span>
+                    </button>
+                </span>
+            </label>
+            <p class="form-message" id="passwordMessage" role="status" hidden></p>
+            <div class="dialog__actions">
+                <button class="btn btn--outline" type="button" data-close-dialog>Cancel</button>
+                <button class="btn btn--dark" type="submit">Update password</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Delete account -->
+    <dialog class="dialog" id="deleteDialog">
+        <form class="dialog__form" id="deleteForm" method="dialog">
+            <h2 class="dialog__title">Delete your account?</h2>
+            <p class="dialog__text">This permanently removes your profile and cannot be undone. Enter your password to confirm.</p>
+            <label class="field">
+                <span class="field__label">Password</span>
+                <span class="field__control">
+                    <input class="input" type="password" id="deletePassword" autocomplete="current-password" required>
+                    <button class="field__toggle" type="button" data-toggle-password aria-label="Show password">
+                        <span class="icon"></span>
+                    </button>
+                </span>
+            </label>
+            <p class="form-message" id="deleteMessage" role="status" hidden></p>
+            <div class="dialog__actions">
+                <button class="btn btn--outline" type="button" data-close-dialog>Cancel</button>
+                <button class="btn btn--danger" type="submit">Delete account</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="/js/common.js"></script>
     <script src="/js/account.js"></script>
 </body>
 

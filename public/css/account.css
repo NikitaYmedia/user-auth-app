@@ -1,0 +1,191 @@
+/* Account Settings */
+
+.account-page {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.06), transparent 56px),
+        var(--bg);
+}
+
+.account-topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.account-topbar .icon {
+    width: 14px;
+    height: 14px;
+}
+
+.account {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 16px 20px 64px;
+}
+
+.account__title {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.account__subtitle {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.section-title {
+    margin: 32px 0 10px;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.section-title--danger {
+    color: #b42318;
+}
+
+.panel {
+    overflow: hidden;
+    border-radius: 16px;
+}
+
+.panel--danger {
+    border-color: var(--danger-border);
+}
+
+/* Row */
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+}
+
+.row--divided {
+    border-top: 1px solid var(--border);
+}
+
+.row--danger {
+    border-top: 1px solid var(--danger-border);
+    background: var(--danger-bg);
+}
+
+.row__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--surface-muted);
+    color: var(--ink);
+}
+
+.row__icon .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.row__icon--danger {
+    background: #ffe0e0;
+    color: var(--danger);
+}
+
+.row__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.row__heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.row__title {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.row__title--lg {
+    font-size: 17px;
+}
+
+.row__text {
+    margin-top: 4px;
+    max-width: 480px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.row__label {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.row__value {
+    margin-top: 2px;
+    font-size: 15px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+.row__value--inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+}
+
+.row__meta {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.row__actions {
+    display: flex;
+    flex: none;
+    gap: 8px;
+}
+
+/* Password dots drawn with CSS: 16 circles */
+
+.dots {
+    display: block;
+    width: 160px;
+    height: 6px;
+    background: radial-gradient(circle, var(--ink) 2.6px, transparent 3px) 0 center / 10px 6px repeat-x;
+}
+
+@media (max-width: 640px) {
+    .row {
+        flex-wrap: wrap;
+        padding: 16px;
+    }
+
+    .row__body {
+        flex-basis: calc(100% - 64px);
+    }
+
+    .row__actions {
+        flex-basis: 100%;
+        padding-left: 60px;
+    }
+
+    .dots {
+        width: 120px;
+    }
+}

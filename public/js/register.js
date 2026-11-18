@@ -1,5 +1,6 @@
 const form = document.getElementById("registerForm");
 const message = document.getElementById("message");
+const submitButton = form.querySelector("[type='submit']");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -7,18 +8,32 @@ form.addEventListener("submit", async (event) => {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
-try {
-    const response = await fetch("/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, password })
-    });
+    App.setBusy(submitButton, true);
+    App.showMessage(message, "");
 
-    const data = await response.json();
-    message.textContent = data.message;
-} catch (error) {
-    message.textContent = "Could not connect to server.";
-}
+    try {
+        const { ok, data } = await App.request("POST", "/register", {
+            email,
+            password
+        });
+
+        if (!ok) {
+            App.showMessage(message, data.message || "Registration failed.", "error");
+            App.setBusy(submitButton, false);
+            return;
+        }
+
+        App.showMessage(
+            message,
+            "Registration successful! Redirecting to login...",
+            "success"
+        );
+
+        setTimeout(() => {
+            window.location.href = "/login.html";
+        }, 1200);
+    } catch (error) {
+        App.showMessage(message, error.message, "error");
+        App.setBusy(submitButton, false);
+    }
 });

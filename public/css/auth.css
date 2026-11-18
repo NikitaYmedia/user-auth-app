@@ -1,0 +1,210 @@
+/* Экраны входа: Register, Login, Admin Login, Forgot / Reset password */
+
+.auth-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.07), transparent 64px),
+        var(--bg);
+}
+
+.auth-page__main {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.auth {
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
+}
+
+.auth__logo {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 18px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.auth__logo .icon {
+    width: 22px;
+    height: 22px;
+}
+
+.auth__title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.auth__subtitle {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.auth__card {
+    margin-top: 28px;
+    padding: 32px;
+    text-align: left;
+    border-radius: 20px;
+}
+
+.auth__card .btn--block {
+    margin-top: 24px;
+    font-size: 14px;
+}
+
+.auth__card .input {
+    font-size: 14px;
+}
+
+.auth__card .field__label {
+    font-size: 13px;
+}
+
+.auth__links {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.auth__links p + p {
+    margin-top: 10px;
+}
+
+.auth__links--small {
+    font-size: 12px;
+}
+
+.auth__links--left {
+    text-align: left;
+}
+
+.auth__footer {
+    margin-top: 28px;
+    color: var(--text-soft);
+    font-size: 12px;
+    text-align: center;
+}
+
+.auth__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.auth__back .icon {
+    width: 14px;
+    height: 14px;
+}
+
+.auth__secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    color: var(--text-soft);
+    font-size: 12px;
+}
+
+.auth__secure .icon {
+    width: 12px;
+    height: 12px;
+}
+
+.auth__intro {
+    margin-bottom: 4px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* Page-specific accents */
+
+.auth-page--register {
+    --btn: #334155;
+    --btn-hover: #1e293b;
+}
+
+.auth-page--login {
+    --btn: #4f6b8f;
+    --btn-hover: #3f5a7c;
+}
+
+.auth-page--admin {
+    --btn: #44597a;
+    --btn-hover: #364969;
+}
+
+.auth-page--admin .auth__logo {
+    background: #eef1f5;
+    color: var(--ink);
+}
+
+.auth-page--admin .auth__subtitle {
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* Admin top bar */
+
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-topbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-topbar__logo {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: var(--ink);
+    color: #fff;
+}
+
+.admin-topbar__logo .icon {
+    width: 16px;
+    height: 16px;
+}
+
+@media (max-width: 480px) {
+    .auth__card {
+        padding: 24px 20px;
+    }
+
+    .auth__title {
+        font-size: 24px;
+    }
+}

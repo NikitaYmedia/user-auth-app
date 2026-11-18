@@ -1,5 +1,6 @@
 const form = document.getElementById("loginForm");
 const message = document.getElementById("message");
+const submitButton = form.querySelector("[type='submit']");
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -7,24 +8,25 @@ form.addEventListener("submit", async (event) => {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    App.setBusy(submitButton, true);
+    App.showMessage(message, "");
+
     try {
-        const response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ email, password })
+        const { ok, data } = await App.request("POST", "/login", {
+            email,
+            password
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            message.textContent = "Login successful! Redirecting...";
-            window.location.href = "/account.html";
-        } else {
-            message.textContent = data.message;
+        if (!ok) {
+            App.showMessage(message, data.message || "Login failed.", "error");
+            App.setBusy(submitButton, false);
+            return;
         }
+
+        App.showMessage(message, "Login successful! Redirecting...", "success");
+        window.location.href = "/account.html";
     } catch (error) {
-        message.textContent = "Could not connect to server.";
+        App.showMessage(message, error.message, "error");
+        App.setBusy(submitButton, false);
     }
 });

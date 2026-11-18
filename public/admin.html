@@ -5,167 +5,310 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="/style.css">
-
-    <style>
-        body {
-            padding: 30px;
-        }
-
-        .admin-container {
-            max-width: 1000px;
-            margin: 40px auto;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .stats {
-            background: #f1f3f5;
-            padding: 25px;
-            border-radius: 12px;
-            margin: 25px 0;
-        }
-
-        .stats h2 {
-            margin: 0;
-            font-size: 32px;
-        }
-
-        .user-list {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            overflow-x: auto;
-        }
-
-        .user-list table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .user-list th,
-        .user-list td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        #search {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-        }
-
-        .admin-button,
-        .action-button {
-            padding: 10px 18px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-        }
-
-        .action-button {
-            margin: 3px;
-        }
-
-        .profile-button {
-            background: #e7f0ff;
-            color: #174ea6;
-        }
-
-        .delete-button {
-            background: #ffe8e8;
-            color: #b42318;
-        }
-
-        .profile-panel {
-            display: none;
-            margin-top: 25px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: #f8f9fa;
-        }
-
-        .profile-panel h3 {
-            margin-top: 0;
-        }
-
-        .profile-panel p {
-            overflow-wrap: anywhere;
-        }
-
-        #profileMessage {
-            margin-top: 15px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/icons.css">
+    <link rel="stylesheet" href="/css/admin.css">
 </head>
 
-<body>
+<body class="admin-page">
+    <div class="shell">
 
-    <div class="admin-container">
-
-        <div class="admin-header">
-            <div>
-                <h1>Admin Dashboard</h1>
-                <p>Manage registered users</p>
+        <!-- ============ Sidebar ============ -->
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <span class="sidebar__logo"><span class="icon icon-shield-check"></span></span>
+                <div>
+                    <p class="sidebar__name">Admin Panel <span class="chip">V2.4</span></p>
+                    <p class="sidebar__tag">System Operations</p>
+                </div>
             </div>
 
-            <button class="admin-button" id="logoutButton">
-                Log out
-            </button>
-        </div>
-
-        <div class="stats">
-            <p>Total registered users</p>
-            <h2 id="totalUsers">Loading...</h2>
-        </div>
-
-        <div class="user-list">
-            <h2>Registered Users</h2>
-
-            <input type="search" id="search" placeholder="Search by email...">
-
-            <p id="message">Loading users...</p>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody id="usersTable"></tbody>
-            </table>
-
-            <div class="profile-panel" id="profilePanel">
-                <h3>User Profile</h3>
-
-                <p><strong>ID:</strong> <span id="profileId"></span></p>
-                <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-                <p><strong>Registration date:</strong> <span id="profileDate"></span></p>
-                <p><strong>Password:</strong> <span id="profilePassword"></span></p>
-
-                <p id="profileMessage"></p>
-
-                <button class="admin-button" id="closeProfile">
-                    Close profile
+            <nav class="sidebar__nav" aria-label="Admin sections">
+                <button class="nav-item is-active" type="button" data-view="users">
+                    <span class="icon icon-users"></span>
+                    <span class="nav-item__label">Users</span>
+                    <span class="nav-item__count" id="navUsersCount">0</span>
                 </button>
-            </div>
-        </div>
+                <button class="nav-item" type="button" data-view="requests">
+                    <span class="icon icon-user-check"></span>
+                    <span class="nav-item__label">Admin Requests</span>
+                    <span class="badge badge--warning" id="navRequestsBadge" hidden></span>
+                </button>
+                <button class="nav-item" type="button" data-view="infrastructure">
+                    <span class="icon icon-server"></span>
+                    <span class="nav-item__label">Infrastructure</span>
+                    <span class="nav-item__dot" id="navInfraDot"></span>
+                </button>
+                <button class="nav-item" type="button" data-view="logs">
+                    <span class="icon icon-shield"></span>
+                    <span class="nav-item__label">Security Logs</span>
+                </button>
+                <button class="nav-item" type="button" disabled title="Coming soon">
+                    <span class="icon icon-sliders"></span>
+                    <span class="nav-item__label">System Config</span>
+                </button>
+            </nav>
 
+            <div class="sidebar__footer">
+                <div class="env-card">
+                    <div class="env-card__row">
+                        <span class="env-card__label">Node Environment</span>
+                        <span class="badge badge--success" id="envBadge">-</span>
+                    </div>
+                    <p class="env-card__region"><span class="status-dot"></span><span id="envRegion">-</span></p>
+                </div>
+
+                <div class="me">
+                    <span class="avatar avatar--dark" id="meAvatar">AD</span>
+                    <div class="me__text">
+                        <p class="me__name" id="meName">Administrator</p>
+                        <p class="me__email" id="meEmail">-</p>
+                    </div>
+                    <button class="icon-button" type="button" id="sidebarLogout" aria-label="Log out">
+                        <span class="icon icon-log-out"></span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ Main ============ -->
+        <div class="main">
+            <header class="topbar">
+                <div>
+                    <p class="topbar__crumbs">ADMIN <span>/</span> <span id="crumbView">Dashboard</span></p>
+                    <h1 class="topbar__title" id="topbarTitle">Admin Dashboard</h1>
+                </div>
+                <div class="topbar__actions">
+                    <span class="badge badge--dot badge--success">System Live</span>
+                    <button class="btn btn--outline btn--sm" type="button" id="logoutButton">
+                        <span class="icon icon-log-out"></span>Log out
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <p class="form-message" id="message" role="status" aria-live="polite" hidden></p>
+
+                <!-- ===== Users view ===== -->
+                <section class="view" id="view-users">
+                    <h2 class="view__title">Manage registered users and system accounts</h2>
+                    <p class="view__subtitle">Review activity, approve elevation requests, and monitor database infrastructure.</p>
+
+                    <div class="stats">
+                        <article class="card stat">
+                            <div class="stat__top">
+                                <span class="stat__label">Total registered users</span>
+                                <span class="stat__icon"><span class="icon icon-users"></span></span>
+                            </div>
+                            <div class="stat__bottom">
+                                <strong class="stat__value" id="totalUsers">-</strong>
+                                <span class="badge badge--success">Active accounts</span>
+                            </div>
+                        </article>
+                        <article class="card stat">
+                            <div class="stat__top">
+                                <span class="stat__label">Verified identity</span>
+                                <span class="stat__icon"><span class="icon icon-shield-check"></span></span>
+                            </div>
+                            <div class="stat__bottom">
+                                <strong class="stat__value" id="verifiedPercent">-</strong>
+                                <span class="stat__note">All credentials set</span>
+                            </div>
+                        </article>
+                        <article class="card stat">
+                            <div class="stat__top">
+                                <span class="stat__label">Security state</span>
+                                <span class="stat__icon stat__icon--success"><span class="icon icon-lock"></span></span>
+                            </div>
+                            <div class="stat__bottom">
+                                <strong class="stat__value">Standard</strong>
+                                <span class="stat__note">Passwords encrypted</span>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="split">
+                        <div class="split__main">
+                            <section class="card block">
+                                <div class="block__head">
+                                    <div>
+                                        <h3 class="block__title">Registered Users</h3>
+                                        <p class="block__subtitle" id="usersSummary">Loading users...</p>
+                                    </div>
+                                    <label class="search">
+                                        <span class="icon icon-search"></span>
+                                        <input class="search__input" type="search" id="search" placeholder="Search by email...">
+                                    </label>
+                                </div>
+
+                                <div class="table-wrap">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Email address</th>
+                                                <th>Status</th>
+                                                <th class="table__right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="usersTable"></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="block__foot">
+                                    <span id="usersFooter">&nbsp;</span>
+                                    <span class="block__sync"><span class="status-dot"></span>Database synchronized</span>
+                                </div>
+                            </section>
+
+                            <section class="card block">
+                                <div class="block__head">
+                                    <div class="block__heading">
+                                        <h3 class="block__title">Pending Admin Elevation Requests</h3>
+                                        <span class="badge badge--warning" id="pendingBadge">0 Pending</span>
+                                    </div>
+                                    <button class="link-button" type="button" data-view="requests">View history</button>
+                                </div>
+                                <p class="block__subtitle block__subtitle--pad">Requests submitted by authenticated users from their account dashboard.</p>
+                                <div class="requests" id="pendingList"></div>
+                            </section>
+                        </div>
+
+                        <aside class="card profile" id="profileCard">
+                            <div class="profile__empty" id="profileEmpty">
+                                <span class="stat__icon"><span class="icon icon-users"></span></span>
+                                <p>Select a user and press <strong>Profile</strong> to see details.</p>
+                            </div>
+
+                            <div id="profileBody" hidden>
+                                <div class="profile__head">
+                                    <h3 class="block__title"><span class="status-dot"></span> User Profile</h3>
+                                    <span class="chip" id="profileId">ID: -</span>
+                                </div>
+
+                                <p class="profile__label">Email</p>
+                                <p class="profile__box" id="profileEmail">-</p>
+
+                                <p class="profile__label">Registration date</p>
+                                <p class="profile__box"><span class="icon icon-calendar"></span><span id="profileDate">-</span></p>
+
+                                <p class="profile__label">Password status</p>
+                                <p class="profile__box profile__box--between">
+                                    <span class="profile__status"><span class="icon icon-circle-check"></span><span id="profilePassword">-</span></span>
+                                    <span class="profile__tag">ENCRYPTED</span>
+                                </p>
+
+                                <p class="form-message" id="profileMessage" role="status" hidden></p>
+
+                                <div class="profile__actions">
+                                    <button class="btn btn--dark btn--block" type="button" id="closeProfile">Close profile</button>
+                                    <button class="btn btn--outline btn--block" type="button" id="resetPasswordButton">Reset Password</button>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <!-- ===== Requests view ===== -->
+                <section class="view" id="view-requests" hidden>
+                    <h2 class="view__title">Admin elevation requests</h2>
+                    <p class="view__subtitle">Approve or decline requests and review past decisions.</p>
+                    <section class="card block">
+                        <div class="requests" id="allRequests"></div>
+                    </section>
+                </section>
+
+                <!-- ===== Infrastructure view ===== -->
+                <section class="view" id="view-infrastructure" hidden>
+                    <div class="view__head">
+                        <div>
+                            <h2 class="view__title">Infrastructure &amp; connected services</h2>
+                            <p class="view__subtitle">Live performance metrics, server health, query latency and runtime status.</p>
+                        </div>
+                        <div class="view__tools">
+                            <span class="badge badge--success" id="infraStatus">System Status: -</span>
+                            <button class="btn btn--outline btn--sm" type="button" id="refreshInfra">
+                                <span class="icon icon-refresh"></span>Refresh Metrics
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="metrics">
+                        <article class="card metric">
+                            <div class="metric__top"><span>Overall Health</span><span class="icon icon-circle-check metric__icon metric__icon--ok"></span></div>
+                            <strong class="metric__value" id="mHealth">-</strong>
+                            <p class="metric__note" id="mHealthNote">&nbsp;</p>
+                        </article>
+                        <article class="card metric">
+                            <div class="metric__top"><span>Database Latency</span><span class="icon icon-gauge metric__icon"></span></div>
+                            <strong class="metric__value" id="mLatency">-</strong>
+                            <p class="metric__note">Average of 3 round-trips</p>
+                        </article>
+                        <article class="card metric">
+                            <div class="metric__top"><span>Total Transactions</span><span class="icon icon-activity metric__icon"></span></div>
+                            <strong class="metric__value" id="mTransactions">-</strong>
+                            <p class="metric__note">Commits + rollbacks</p>
+                        </article>
+                        <article class="card metric">
+                            <div class="metric__top"><span>Active DB Connections</span><span class="icon icon-layers metric__icon"></span></div>
+                            <strong class="metric__value" id="mConnections">-</strong>
+                            <p class="metric__note" id="mConnectionsNote">&nbsp;</p>
+                        </article>
+                    </div>
+
+                    <div class="services">
+                        <article class="card service">
+                            <div class="service__head">
+                                <span class="service__icon"><span class="icon icon-database"></span></span>
+                                <h3 class="service__title">Postgres</h3>
+                                <span class="badge badge--dot badge--success">Operational</span>
+                            </div>
+                            <dl class="kv" id="dbKv"></dl>
+                        </article>
+                        <article class="card service">
+                            <div class="service__head">
+                                <span class="service__icon"><span class="icon icon-layers"></span></span>
+                                <h3 class="service__title">Connection Pool</h3>
+                                <span class="badge badge--dot badge--info">In Sync</span>
+                            </div>
+                            <dl class="kv" id="poolKv"></dl>
+                        </article>
+                        <article class="card service">
+                            <div class="service__head">
+                                <span class="service__icon"><span class="icon icon-terminal"></span></span>
+                                <h3 class="service__title">Node Runtime</h3>
+                                <span class="badge badge--dot badge--success">Running</span>
+                            </div>
+                            <dl class="kv" id="runtimeKv"></dl>
+                        </article>
+                    </div>
+
+                    <section class="card block">
+                        <div class="block__head">
+                            <div>
+                                <h3 class="block__title">Infrastructure Events &amp; Health Log</h3>
+                                <p class="block__subtitle">Recent server and administrator activity.</p>
+                            </div>
+                            <span class="badge badge--dot badge--info">Live Stream</span>
+                        </div>
+                        <ul class="events" id="infraEvents"></ul>
+                    </section>
+                </section>
+
+                <!-- ===== Logs view ===== -->
+                <section class="view" id="view-logs" hidden>
+                    <h2 class="view__title">Security logs</h2>
+                    <p class="view__subtitle">Sign-ins, failed attempts and administrative actions since the server started.</p>
+                    <section class="card block">
+                        <ul class="events" id="logEvents"></ul>
+                    </section>
+                </section>
+            </main>
+        </div>
     </div>
 
+    <script src="/js/common.js"></script>
     <script src="/js/admin.js"></script>
-
 </body>
 
 </html>
