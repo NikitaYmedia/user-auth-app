@@ -6,6 +6,7 @@ const { Resend } = require("resend");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
 const pool = require("./db");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -34,8 +35,15 @@ app.use((req, res, next) => {
     next();
 });
 
+// Сессии хранятся в Postgres (таблица "session" создаётся сама), поэтому
+// они переживают перезапуск сервера и работают на serverless-хостинге.
+// Своё имя cookie, чтобы не конфликтовать с другими проектами на localhost.
+const SESSION_COOKIE = "auto.sid";
+
 app.use(
     session({
+        name: SESSION_COOKIE,
+        store: new pgSession({ pool, createTableIfMissing: true }),
         secret: process.env.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
@@ -49,6 +57,11 @@ app.use(
 );
 
 app.use(express.static(path.join(__dirname, "public")));
+
+// schemaReady объявляется ниже (function-hoisting для ensureSchema не нужен: промис создаётся при загрузке модуля)
+app.use((req, res, next) => {
+    schemaReady.then(() => next());
+});
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -119,7 +132,7 @@ function destroySession(req, res, callback) {
             return callback(error);
         }
 
-        res.clearCookie("connect.sid", {
+        res.clearCookie(SESSION_COOKIE, {
             httpOnly: true,
             secure: IS_PRODUCTION,
             sameSite: "lax"
@@ -1227,14 +1240,16 @@ app.get("/api/admin/events", requireAdmin, (req, res) => {
 
 logEvent("success", "Server started", `Node ${process.version}`, "Runtime");
 
+// Миграция выполняется один раз; запросы ждут её завершения (важно для
+// холодного старта на Vercel, где сервер запускается прямо на первом запросе).
+const schemaReady = ensureSchema();
+
 if (require.main === module) {
-    ensureSchema().then(() => {
+    schemaReady.then(() => {
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
         });
     });
-} else {
-    ensureSchema();
 }
 
 module.exports = app;
