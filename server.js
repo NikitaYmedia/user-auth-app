@@ -877,6 +877,16 @@ app.get("/api/admin/me", requireAdmin, async (req, res) => {
     }
 });
 
+app.get("/api/admin/date", requireAdmin, (req, res) => {
+    const now = new Date();
+
+    return res.status (200).json({
+        iso: now.toISOString(),
+        local: now.toISOString(),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+});
+
 app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
         const result = await pool.query(

@@ -567,7 +567,7 @@ function clearConsole() {
     consoleOutput.replaceChildren();
 }
 
-function executeCommand(input) {
+async function executeCommand(input) {
     const parts = input.trim().split(/\s+/);
     const command = parts[0].toLowerCase();
 
@@ -586,7 +586,25 @@ function executeCommand(input) {
             break;
 
         case "date":
-            addConsoleLine(new Date().toString());
+            try {
+                const data = await adminRequest("GET", "/api/admin/date");
+
+                addConsoleLine(data.local);
+                addConsoleLine(
+                    `Time zone: ${data.timeZone}`,
+                    "console-line--muted"
+                );
+
+                addConsoleLine(
+                    `ISO: ${data.iso}`,
+                    "console-line--muted"
+                );
+            } catch (error) {
+                addConsoleLine(
+                `Error: ${error.message}`,
+                "console-line--warning"
+                );
+            }
             break;
 
         default:
