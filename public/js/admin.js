@@ -548,7 +548,7 @@ $("logoutButton").addEventListener("click", logout);
 $("sidebarLogout").addEventListener("click", logout);
 
 const consoleForm = $("consoleForm");
-const consileInput = $("consoleInput");
+const consoleInput = $("consoleInput");
 const consoleOutput = $("consoleOutput");
 const clearConsoleButton = $("clearConsole");
 
@@ -601,8 +601,24 @@ if (consoleForm && consileInput && consoleOutput) {
     consoleForm.addEventListener("submit", (event) => {
         event.preventDefault();
 
-        const command = consileInput.value.trim();
-    })
+        const command = consoleInput.value.trim();
+
+        if (!command) return ;
+        addConsoleLine(`admin@obsidian:~$ ${command}`, "console-prompt");
+
+        executeCommand(command);
+
+        consoleInput.value = "";
+        consoleInput.focus();
+    });
+
+    if (clearConsoleButton) {
+        clearConsoleButton.addEventListener("click", () => {
+            clearConsole();
+            addConsoleLine("Console cleared.", "console-line--muted");
+            consoleInput.focus();
+        });
+    }
 }
 
 loadMe();
