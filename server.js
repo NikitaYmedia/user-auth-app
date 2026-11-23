@@ -156,7 +156,7 @@ async function withTransaction(work) {
         await client.query("COMMIT");
         return result;
     } catch (error) {
-        await client.query("ROLLBACK").catch(() => {});
+        await client.query("ROLLBACK").catch(() => { });
         throw error;
     } finally {
         client.release();
@@ -555,10 +555,10 @@ app.get("/account", requireUser, async (req, res) => {
             isAdmin: user.is_admin,
             adminRequest: adminRequest
                 ? {
-                      status: adminRequest.status,
-                      reason: adminRequest.reason,
-                      createdAt: adminRequest.created_at
-                  }
+                    status: adminRequest.status,
+                    reason: adminRequest.reason,
+                    createdAt: adminRequest.created_at
+                }
                 : null
         });
     } catch (error) {
@@ -881,7 +881,7 @@ app.get("/api/admin/me", requireAdmin, async (req, res) => {
 app.get("/api/admin/date", requireAdmin, (req, res) => {
     const now = new Date();
 
-    return res.status (200).json({
+    return res.status(200).json({
         iso: now.toISOString(),
         local: now.toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -889,15 +889,15 @@ app.get("/api/admin/date", requireAdmin, (req, res) => {
 });
 
 app.get("/api/admin/uptime", requireAdmin, (req, res) => {
-    const totalSecond = Math.floor(process.uptime());
+    const totalSeconds = Math.floor(process.uptime());
 
-    const days = Math.floor(totalSecond / 86400);
-    const hours = Math.floor((totalSecond % 86400) / 3600);
-    const minutes = Math.floor((totalSecond % 3600) / 60);
-    const second = totalSecond % 60;
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
     return res.status(200).json({
-        uptimeSeconds: totalSecond,
+        uptimeSeconds: totalSeconds,
         formatted: `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
     });
 });

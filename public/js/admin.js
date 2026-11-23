@@ -602,27 +602,28 @@ async function executeCommand(input) {
                 );
             } catch (error) {
                 addConsoleLine(
-                `Error: ${error.message}`,
-                "console-line--warning"
+                    `Error: ${error.message}`,
+                    "console-line--warning"
                 );
             }
             break;
 
-            case "uptime":
-                try {
-                    const data = await adminRequest("GET", "/api/admin/uptime");
-                    addConsoleLine(`Server uptime: ${data.formatted}`);
-                    addConsoleLine(
-                      `Total seconds: ${data.uptimeSeconds}`,
-                      "console-line--muted"
-                  );
-                } catch  (error) {
-                    addConsoleLine(
-                        `Error: ${error.message}`,
-                        "console-line--warning"
-                    );
-                }
-                break;
+        case "uptime":
+            try {
+                const data = await adminRequest("GET", "/api/admin/uptime");
+
+                addConsoleLine(`Server uptime: ${data.formatted}`);
+                addConsoleLine(
+                    `Total seconds: ${data.uptimeSeconds}`,
+                    "console-line--muted"
+                );
+            } catch (error) {
+                addConsoleLine(
+                    `Error: ${error.message}`,
+                    "console-line--warning"
+                );
+            }
+            break;
 
         default:
             addConsoleLine(
