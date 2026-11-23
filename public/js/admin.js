@@ -241,8 +241,6 @@ function renderUsers() {
         : "No entries";
 }
 
-/* ---------- Profile ---------- */
-
 function closeProfilePanel() {
     selectedUserId = null;
     $("profileBody").hidden = true;
@@ -325,8 +323,6 @@ async function deleteUser(userId, email) {
 }
 
 search.addEventListener("input", renderUsers);
-
-/* ---------- Admin requests ---------- */
 
 function renderRequestItem(request) {
     const item = el("article", "request");
@@ -425,8 +421,6 @@ async function reviewRequest(requestId, action) {
         App.showMessage(message, error.message, "error");
     }
 }
-
-/* ---------- Infrastructure ---------- */
 
 function fillKv(container, rows) {
     container.replaceChildren();
@@ -534,8 +528,6 @@ async function loadInfrastructure() {
 
 $("refreshInfra").addEventListener("click", loadInfrastructure);
 
-/* ---------- Logs ---------- */
-
 async function loadLogs() {
     try {
         const data = await adminRequest("GET", "/api/admin/events");
@@ -544,8 +536,6 @@ async function loadLogs() {
         App.showMessage(message, error.message, "error");
     }
 }
-
-/* ---------- Logout ---------- */
 
 async function logout() {
     try {
@@ -563,8 +553,6 @@ async function logout() {
 
 $("logoutButton").addEventListener("click", logout);
 $("sidebarLogout").addEventListener("click", logout);
-
-/* ---------- Start ---------- */
 
 loadMe();
 showView(location.hash.slice(1));
