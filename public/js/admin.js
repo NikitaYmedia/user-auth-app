@@ -546,36 +546,63 @@ async function logout() {
 
 $("logoutButton").addEventListener("click", logout);
 $("sidebarLogout").addEventListener("click", logout);
-    
+
 const consoleForm = $("consoleForm");
-const consoleInput = $("consoleInput");
+const consileInput = $("consoleInput");
 const consoleOutput = $("consoleOutput");
+const clearConsoleButton = $("clearConsole");
 
 function addConsoleLine(text, className = "") {
-    const line = el("p", "console-line" + (className ? " " + className : ""), text);
+    const line = el(
+        "p",
+        "console-line" + (className ? " " + className : ""),
+        text
+    );
+
     consoleOutput.appendChild(line);
     consoleOutput.scrollTop = consoleOutput.scrollHeight;
 }
 
-if (consoleForm && consoleInput && consoleOutput) {
+function clearConsole() {
+    consoleOutput.replaceChild();
+}
+
+function executeCommand(input) {
+    const parts = input.trim().split(/\s+/);
+    const command = parts[0].toLowerCase();
+
+    switch (command) {
+        case "help":
+            addConsoleLine("Available commands:", "console-line--muted");
+            addConsoleLine("");
+            addConsoleLine("  help     Show available commands");
+            addConsoleLine("  clear    Clear console");
+            addConsoleLine("  date     Show current date and time");
+            break;
+
+            case "clear":
+                clearConsole();
+                addConsoleLine("Console cleared.", "console-line--muted");
+                break;
+
+                case "data":
+                    addConsoleLine(new Data().toString());
+                    break;
+
+                    default:
+                        addConsoleLine(
+                            `Command not found: ${command}`,
+                            "console-line--warning"
+                        );
+    }
+}
+
+if (consoleForm && consileInput && consoleOutput) {
     consoleForm.addEventListener("submit", (event) => {
         event.preventDefault();
-        const command = consoleInput.value.trim();
 
-        if (!command) return;
-
-        addConsoleLine(`admin@obsidian:~$ ${command}`, "console-prompt");
-        addConsoleLine("Command execution is not enabled yet.", "console-line--warning");
-        consoleInput.value = "";
-        consoleInput.focus();
-    });
-
-    $("clearConsole").addEventListener("click", () => {
-        consoleOutput.replaceChildren();
-        addConsoleLine("Console cleared.", "console-line--muted");
-        addConsoleLine("Command execution is not enabled yet.", "console-line--muted");
-        consoleInput.focus();
-    });
+        const command = consileInput.value.trim();
+    })
 }
 
 loadMe();
