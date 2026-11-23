@@ -564,7 +564,7 @@ function addConsoleLine(text, className = "") {
 }
 
 function clearConsole() {
-    consoleOutput.replaceChild();
+    consoleOutput.replaceChildren();
 }
 
 function executeCommand(input) {
@@ -580,20 +580,24 @@ function executeCommand(input) {
             addConsoleLine("  date     Show current date and time");
             break;
 
-            case "clear":
-                clearConsole();
-                addConsoleLine("Console cleared.", "console-line--muted");
-                break;
+        case "clear":
+            clearConsole();
+            addConsoleLine("Console cleared.", "console-line--muted");
+            break;
 
-                case "data":
-                    addConsoleLine(new Data().toString());
-                    break;
+        case "date":
+            addConsoleLine(new Date().toString());
+            break;
 
-                    default:
-                        addConsoleLine(
-                            `Command not found: ${command}`,
-                            "console-line--warning"
-                        );
+        default:
+            addConsoleLine(
+                `Command not found: ${command}`,
+                "console-line--warning"
+            );
+            addConsoleLine(
+                "Type 'help' to see available commands.",
+                "console-line--muted"
+            );
     }
 }
 
@@ -603,7 +607,8 @@ if (consoleForm && consoleInput && consoleOutput) {
 
         const command = consoleInput.value.trim();
 
-        if (!command) return ;
+        if (!command) return;
+
         addConsoleLine(`admin@obsidian:~$ ${command}`, "console-prompt");
 
         executeCommand(command);
