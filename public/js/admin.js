@@ -16,8 +16,6 @@ let requests = [];
 let selectedUserId = null;
 let currentView = "users";
 
-/* ---------- Helpers ---------- */
-
 function el(tag, className, text) {
     const node = document.createElement(tag);
 
@@ -40,7 +38,6 @@ function initial(email) {
     return String(email || "?").charAt(0).toUpperCase();
 }
 
-// Все запросы к админ-API: при 401/403 уходим на страницу входа.
 async function adminRequest(method, url, body) {
     const result = await App.request(method, url, body);
 
@@ -71,7 +68,6 @@ function formatUptime(seconds) {
     return hours ? `${hours}h ${minutes}m` : `${minutes}m ${seconds % 60}s`;
 }
 
-/* ---------- Views ---------- */
 
 function showView(name) {
     if (!views[name]) {
@@ -116,8 +112,6 @@ document.querySelectorAll("[data-view]").forEach((control) => {
     control.addEventListener("click", () => showView(control.dataset.view));
 });
 
-/* ---------- Current admin ---------- */
-
 async function loadMe() {
     try {
         const me = await adminRequest("GET", "/api/admin/me");
@@ -142,8 +136,6 @@ function renderPendingCount(count) {
     badge.textContent = `${count} pending`;
     $("pendingBadge").textContent = `${count} Pending`;
 }
-
-/* ---------- Users ---------- */
 
 async function loadUsers() {
     $("usersSummary").textContent = "Loading users...";
