@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const pool = require("./db");
+const { uptime } = require("process");
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -884,6 +885,20 @@ app.get("/api/admin/date", requireAdmin, (req, res) => {
         iso: now.toISOString(),
         local: now.toISOString(),
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    });
+});
+
+app.get("/api/admin/uptime", requireAdmin, (req, res) => {
+    const totalSecond = Math.floor(process.uptime());
+
+    const days = Math.floor(totalSecond / 86400);
+    const hours = Math.floor((totalSecond % 86400) / 3600);
+    const minutes = Math.floor((totalSecond % 3600) / 60);
+    const second = totalSecond % 60;
+
+    return res.status(200).json({
+        uptimeSeconds: totalSecond,
+        formatted: `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`
     });
 });
 

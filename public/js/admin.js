@@ -578,6 +578,7 @@ async function executeCommand(input) {
             addConsoleLine("  help     Show available commands");
             addConsoleLine("  clear    Clear console");
             addConsoleLine("  date     Show current date and time");
+            addConsoleLine("  uptime   Show server uptime");
             break;
 
         case "clear":
@@ -606,6 +607,22 @@ async function executeCommand(input) {
                 );
             }
             break;
+
+            case "uptime":
+                try {
+                    const data = await adminRequest("GET", "/api/admin/uptime");
+                    addConsoleLine(`Server uptime: ${data.formatted}`);
+                    addConsoleLine(
+                      `Total seconds: ${data.uptimeSeconds}`,
+                      "console-line--muted"
+                  );
+                } catch  (error) {
+                    addConsoleLine(
+                        `Error: ${error.message}`,
+                        "console-line--warning"
+                    );
+                }
+                break;
 
         default:
             addConsoleLine(
