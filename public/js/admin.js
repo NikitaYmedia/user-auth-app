@@ -8,7 +8,8 @@ const views = {
     users: { title: "Admin Dashboard", crumb: "Dashboard" },
     requests: { title: "Admin Requests", crumb: "Admin Requests" },
     infrastructure: { title: "Infrastructure", crumb: "Infrastructure" },
-    logs: { title: "Security Logs", crumb: "Security Logs" }
+    logs: { title: "Security Logs", crumb: "Security Logs" },
+    config: { title: "System Config", crumb: "System Config" }
 };
 
 let users = [];
@@ -331,7 +332,7 @@ function renderRequestItem(request) {
             el(
                 "span",
                 "badge " +
-                    (request.status === "approved" ? "badge--success" : "badge--danger"),
+                (request.status === "approved" ? "badge--success" : "badge--danger"),
                 request.status === "approved" ? "Approved" : "Declined"
             )
         );
@@ -545,6 +546,37 @@ async function logout() {
 
 $("logoutButton").addEventListener("click", logout);
 $("sidebarLogout").addEventListener("click", logout);
+    
+const consoleForm = $("consoleForm");
+const consoleInput = $("consoleInput");
+const consoleOutput = $("consoleOutput");
+
+function addConsoleLine(text, className = "") {
+    const line = el("p", "console-line" + (className ? " " + className : ""), text);
+    consoleOutput.appendChild(line);
+    consoleOutput.scrollTop = consoleOutput.scrollHeight;
+}
+
+if (consoleForm && consoleInput && consoleOutput) {
+    consoleForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const command = consoleInput.value.trim();
+
+        if (!command) return;
+
+        addConsoleLine(`admin@obsidian:~$ ${command}`, "console-prompt");
+        addConsoleLine("Command execution is not enabled yet.", "console-line--warning");
+        consoleInput.value = "";
+        consoleInput.focus();
+    });
+
+    $("clearConsole").addEventListener("click", () => {
+        consoleOutput.replaceChildren();
+        addConsoleLine("Console cleared.", "console-line--muted");
+        addConsoleLine("Command execution is not enabled yet.", "console-line--muted");
+        consoleInput.focus();
+    });
+}
 
 loadMe();
 showView(location.hash.slice(1));

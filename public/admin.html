@@ -42,7 +42,7 @@
                     <span class="icon icon-shield"></span>
                     <span class="nav-item__label">Security Logs</span>
                 </button>
-                <button class="nav-item" type="button" disabled title="Coming soon">
+                <button class="nav-item" type="button" data-view="config">
                     <span class="icon icon-sliders"></span>
                     <span class="nav-item__label">System Config</span>
                 </button>
@@ -89,7 +89,8 @@
 
                 <section class="view" id="view-users">
                     <h2 class="view__title">Manage registered users and system accounts</h2>
-                    <p class="view__subtitle">Review activity, approve elevation requests, and monitor database infrastructure.</p>
+                    <p class="view__subtitle">Review activity, approve elevation requests, and monitor database
+                        infrastructure.</p>
 
                     <div class="stats">
                         <article class="card stat">
@@ -134,7 +135,8 @@
                                     </div>
                                     <label class="search">
                                         <span class="icon icon-search"></span>
-                                        <input class="search__input" type="search" id="search" placeholder="Search by email...">
+                                        <input class="search__input" type="search" id="search"
+                                            placeholder="Search by email...">
                                     </label>
                                 </div>
 
@@ -154,7 +156,8 @@
 
                                 <div class="block__foot">
                                     <span id="usersFooter">&nbsp;</span>
-                                    <span class="block__sync"><span class="status-dot"></span>Database synchronized</span>
+                                    <span class="block__sync"><span class="status-dot"></span>Database
+                                        synchronized</span>
                                 </div>
                             </section>
 
@@ -166,7 +169,8 @@
                                     </div>
                                     <button class="link-button" type="button" data-view="requests">View history</button>
                                 </div>
-                                <p class="block__subtitle block__subtitle--pad">Requests submitted by authenticated users from their account dashboard.</p>
+                                <p class="block__subtitle block__subtitle--pad">Requests submitted by authenticated
+                                    users from their account dashboard.</p>
                                 <div class="requests" id="pendingList"></div>
                             </section>
                         </div>
@@ -187,19 +191,23 @@
                                 <p class="profile__box" id="profileEmail">-</p>
 
                                 <p class="profile__label">Registration date</p>
-                                <p class="profile__box"><span class="icon icon-calendar"></span><span id="profileDate">-</span></p>
+                                <p class="profile__box"><span class="icon icon-calendar"></span><span
+                                        id="profileDate">-</span></p>
 
                                 <p class="profile__label">Password status</p>
                                 <p class="profile__box profile__box--between">
-                                    <span class="profile__status"><span class="icon icon-circle-check"></span><span id="profilePassword">-</span></span>
+                                    <span class="profile__status"><span class="icon icon-circle-check"></span><span
+                                            id="profilePassword">-</span></span>
                                     <span class="profile__tag">ENCRYPTED</span>
                                 </p>
 
                                 <p class="form-message" id="profileMessage" role="status" hidden></p>
 
                                 <div class="profile__actions">
-                                    <button class="btn btn--dark btn--block" type="button" id="closeProfile">Close profile</button>
-                                    <button class="btn btn--outline btn--block" type="button" id="resetPasswordButton">Reset Password</button>
+                                    <button class="btn btn--dark btn--block" type="button" id="closeProfile">Close
+                                        profile</button>
+                                    <button class="btn btn--outline btn--block" type="button"
+                                        id="resetPasswordButton">Reset Password</button>
                                 </div>
                             </div>
                         </aside>
@@ -218,7 +226,8 @@
                     <div class="view__head">
                         <div>
                             <h2 class="view__title">Infrastructure &amp; connected services</h2>
-                            <p class="view__subtitle">Live performance metrics, server health, query latency and runtime status.</p>
+                            <p class="view__subtitle">Live performance metrics, server health, query latency and runtime
+                                status.</p>
                         </div>
                         <div class="view__tools">
                             <span class="badge badge--success" id="infraStatus">System Status: -</span>
@@ -230,22 +239,26 @@
 
                     <div class="metrics">
                         <article class="card metric">
-                            <div class="metric__top"><span>Overall Health</span><span class="icon icon-circle-check metric__icon metric__icon--ok"></span></div>
+                            <div class="metric__top"><span>Overall Health</span><span
+                                    class="icon icon-circle-check metric__icon metric__icon--ok"></span></div>
                             <strong class="metric__value" id="mHealth">-</strong>
                             <p class="metric__note" id="mHealthNote">&nbsp;</p>
                         </article>
                         <article class="card metric">
-                            <div class="metric__top"><span>Database Latency</span><span class="icon icon-gauge metric__icon"></span></div>
+                            <div class="metric__top"><span>Database Latency</span><span
+                                    class="icon icon-gauge metric__icon"></span></div>
                             <strong class="metric__value" id="mLatency">-</strong>
                             <p class="metric__note">Average of 3 round-trips</p>
                         </article>
                         <article class="card metric">
-                            <div class="metric__top"><span>Total Transactions</span><span class="icon icon-activity metric__icon"></span></div>
+                            <div class="metric__top"><span>Total Transactions</span><span
+                                    class="icon icon-activity metric__icon"></span></div>
                             <strong class="metric__value" id="mTransactions">-</strong>
                             <p class="metric__note">Commits + rollbacks</p>
                         </article>
                         <article class="card metric">
-                            <div class="metric__top"><span>Active DB Connections</span><span class="icon icon-layers metric__icon"></span></div>
+                            <div class="metric__top"><span>Active DB Connections</span><span
+                                    class="icon icon-layers metric__icon"></span></div>
                             <strong class="metric__value" id="mConnections">-</strong>
                             <p class="metric__note" id="mConnectionsNote">&nbsp;</p>
                         </article>
@@ -290,9 +303,58 @@
                     </section>
                 </section>
 
+                <section class="view" id="view-config" hidden>
+                    <div class="view__head">
+                        <div>
+                            <h2 class="view__title">System Configuration</h2>
+                            <p class="view__subtitle">Administrative command console. Command execution will be
+                                configured separately.</p>
+                        </div>
+                        <span class="badge badge--warning">COMMANDS DISABLED</span>
+                    </div>
+
+                    <section class="card config-terminal">
+                        <div class="config-terminal__top">
+                            <div class="config-terminal__identity">
+                                <span class="icon icon-terminal"></span>
+                                <div>
+                                    <strong>Obsidian System Console</strong>
+                                    <span>Secure administrative interface</span>
+                                </div>
+                            </div>
+                            <div class="config-terminal__controls" aria-label="Console controls">
+                                <span class="config-terminal__status"><span></span> Interface ready</span>
+                                <button class="btn btn--outline btn--sm" type="button" id="clearConsole">
+                                    <span class="icon icon-trash"></span>Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="config-terminal__screen" id="consoleOutput" role="log" aria-live="polite"
+                            aria-label="Console output">
+                            <p class="console-line console-line--muted">Obsidian System Console [Version 1.0]</p>
+                            <p class="console-line console-line--muted">This console interface is ready. Commands have
+                                not been enabled yet.</p>
+                            <p class="console-line console-line--success">Administrator session detected.</p>
+                            <p class="console-line"><span class="console-prompt">admin@obsidian:~$</span> <span
+                                    class="console-cursor" aria-hidden="true"></span></p>
+                        </div>
+
+                        <form class="config-terminal__form" id="consoleForm" autocomplete="off">
+                            <label class="config-terminal__prompt" for="consoleInput">admin@obsidian:~$</label>
+                            <input id="consoleInput" name="command" type="text" spellcheck="false" autocapitalize="off"
+                                placeholder="Enter a command..." aria-label="Enter a command">
+                            <button class="btn btn--dark btn--sm" type="submit">Enter</button>
+                        </form>
+                        <p class="config-terminal__note">For now, input is display-only. No server, database, or system
+                            commands are executed.</p>
+                    </section>
+                </section>
+
                 <section class="view" id="view-logs" hidden>
                     <h2 class="view__title">Security logs</h2>
-                    <p class="view__subtitle">Sign-ins, failed attempts and administrative actions since the server started.</p>
+                    <p class="view__subtitle">Sign-ins, failed attempts and administrative actions since the server
+                        started.</p>
                     <section class="card block">
                         <ul class="events" id="logEvents"></ul>
                     </section>

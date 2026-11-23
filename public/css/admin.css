@@ -334,7 +334,7 @@
     font-size: 13px;
 }
 
-.content > .form-message {
+.content>.form-message {
     margin: 0 0 16px;
 }
 
@@ -1009,5 +1009,169 @@
 
     .event {
         flex-wrap: wrap;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* System Config terminal                                               */
+/* ------------------------------------------------------------------ */
+
+.config-terminal {
+    overflow: hidden;
+    padding: 0;
+}
+
+.config-terminal__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border, #e5e9f0);
+}
+
+.config-terminal__identity,
+.config-terminal__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.config-terminal__identity>.icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #10182b;
+    color: #fff;
+    font-size: 19px;
+}
+
+.config-terminal__identity strong,
+.config-terminal__identity span {
+    display: block;
+}
+
+.config-terminal__identity strong {
+    color: var(--text, #101828);
+    font-size: 14px;
+}
+
+.config-terminal__identity div>span {
+    margin-top: 3px;
+    color: var(--muted, #64748b);
+    font-size: 12px;
+}
+
+.config-terminal__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #16834b;
+    font-size: 12px;
+}
+
+.config-terminal__status span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+}
+
+.config-terminal__screen {
+    min-height: 340px;
+    max-height: 520px;
+    overflow: auto;
+    padding: 22px;
+    background: #0b1220;
+    color: #dbe5f3;
+    font: 13px/1.8 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.console-line {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.console-line--muted {
+    color: #91a0b7;
+}
+
+.console-line--success {
+    color: #4ade80;
+}
+
+.console-line--warning {
+    color: #fbbf24;
+}
+
+.console-prompt {
+    color: #4ade80;
+}
+
+.console-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 15px;
+    vertical-align: -3px;
+    background: #4ade80;
+}
+
+.config-terminal__form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: #111c2e;
+    border-top: 1px solid #263449;
+}
+
+.config-terminal__prompt {
+    flex: 0 0 auto;
+    color: #4ade80;
+    font: 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.config-terminal__form input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: #f8fafc;
+    background: transparent;
+    font: 13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.config-terminal__form input::placeholder {
+    color: #8190a8;
+}
+
+.config-terminal__note {
+    margin: 0;
+    padding: 10px 20px 14px;
+    color: var(--muted, #64748b);
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .config-terminal__top {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .config-terminal__controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .config-terminal__form {
+        gap: 8px;
+        padding-inline: 12px;
+    }
+
+    .config-terminal__prompt {
+        font-size: 11px;
     }
 }
