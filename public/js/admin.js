@@ -597,7 +597,7 @@ function executeCommand(input) {
     }
 }
 
-if (consoleForm && consileInput && consoleOutput) {
+if (consoleForm && consoleInput && consoleOutput) {
     consoleForm.addEventListener("submit", (event) => {
         event.preventDefault();
 
